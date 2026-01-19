@@ -42,20 +42,20 @@ async def search_users(graph_client: GraphClient, query: str, limit: int = 10) -
             response = await client.users.with_url(response.odata_next_link).get()
             if response and response.value:
                 users.extend(response.value)
-        # Format the response with all user fields
+        # Format the response with all user fields (convert None to empty string for MCP compatibility)
         formatted_users = []
         for user in users[:limit]:
             user_data = {
-                'id': user.id,
-                'displayName': user.display_name,
-                'mail': user.mail,
-                'userPrincipalName': user.user_principal_name,
-                'givenName': user.given_name,
-                'surname': user.surname,
-                'jobTitle': user.job_title,
-                'officeLocation': user.office_location,
-                'businessPhones': user.business_phones,
-                'mobilePhone': user.mobile_phone
+                'id': user.id or '',
+                'displayName': user.display_name or '',
+                'mail': user.mail or '',
+                'userPrincipalName': user.user_principal_name or '',
+                'givenName': user.given_name or '',
+                'surname': user.surname or '',
+                'jobTitle': user.job_title or '',
+                'officeLocation': user.office_location or '',
+                'businessPhones': user.business_phones or [],
+                'mobilePhone': user.mobile_phone or ''
             }
             formatted_users.append(user_data)
         return formatted_users
@@ -78,18 +78,18 @@ async def get_user_by_id(graph_client: GraphClient, user_id: str) -> Optional[Di
         ms_user = await client.users.by_user_id(user_id).get()
         
         if ms_user:
-            # Convert MS Graph User to our dictionary format
+            # Convert MS Graph User to our dictionary format (convert None to empty string for MCP compatibility)
             user_data = {
-                'id': ms_user.id,
-                'displayName': ms_user.display_name,
-                'mail': ms_user.mail,
-                'userPrincipalName': ms_user.user_principal_name,
-                'givenName': ms_user.given_name,
-                'surname': ms_user.surname,
-                'jobTitle': ms_user.job_title,
-                'officeLocation': ms_user.office_location,
-                'businessPhones': ms_user.business_phones,
-                'mobilePhone': ms_user.mobile_phone
+                'id': ms_user.id or '',
+                'displayName': ms_user.display_name or '',
+                'mail': ms_user.mail or '',
+                'userPrincipalName': ms_user.user_principal_name or '',
+                'givenName': ms_user.given_name or '',
+                'surname': ms_user.surname or '',
+                'jobTitle': ms_user.job_title or '',
+                'officeLocation': ms_user.office_location or '',
+                'businessPhones': ms_user.business_phones or [],
+                'mobilePhone': ms_user.mobile_phone or ''
             }
             return user_data
         else:
@@ -131,16 +131,16 @@ async def get_privileged_users(graph_client: GraphClient) -> List[Dict[str, Any]
                         # Deduplicate by user_id
                         if user_id not in privileged_users:
                             privileged_users[user_id] = {
-                                'id': user_id,
-                                'displayName': getattr(member, 'display_name', None),
-                                'mail': getattr(member, 'mail', None),
-                                'userPrincipalName': getattr(member, 'user_principal_name', None),
-                                'givenName': getattr(member, 'given_name', None),
-                                'surname': getattr(member, 'surname', None),
-                                'jobTitle': getattr(member, 'job_title', None),
-                                'officeLocation': getattr(member, 'office_location', None),
-                                'businessPhones': getattr(member, 'business_phones', None),
-                                'mobilePhone': getattr(member, 'mobile_phone', None),
+                                'id': user_id or '',
+                                'displayName': getattr(member, 'display_name', None) or '',
+                                'mail': getattr(member, 'mail', None) or '',
+                                'userPrincipalName': getattr(member, 'user_principal_name', None) or '',
+                                'givenName': getattr(member, 'given_name', None) or '',
+                                'surname': getattr(member, 'surname', None) or '',
+                                'jobTitle': getattr(member, 'job_title', None) or '',
+                                'officeLocation': getattr(member, 'office_location', None) or '',
+                                'businessPhones': getattr(member, 'business_phones', None) or [],
+                                'mobilePhone': getattr(member, 'mobile_phone', None) or '',
                                 'roles': set()
                             }
                         # Add the role name to the user's roles set
@@ -176,11 +176,11 @@ async def get_user_groups(graph_client: GraphClient, user_id: str) -> List[Dict[
                 group = await client.groups.by_group_id(group_id).get()
                 if group:
                     group_data = {
-                        'id': group.id,
-                        'displayName': getattr(group, 'display_name', None),
-                        'mail': getattr(group, 'mail', None),
-                        'groupTypes': getattr(group, 'group_types', None),
-                        'description': getattr(group, 'description', None)
+                        'id': group.id or '',
+                        'displayName': getattr(group, 'display_name', None) or '',
+                        'mail': getattr(group, 'mail', None) or '',
+                        'groupTypes': getattr(group, 'group_types', None) or [],
+                        'description': getattr(group, 'description', None) or ''
                     }
                     groups_list.append(group_data)
         return groups_list
@@ -212,10 +212,10 @@ async def get_user_roles(graph_client: GraphClient, user_id: str) -> List[Dict[s
                 role = await client.directory_roles.by_directory_role_id(role_id).get()
                 if role:
                     role_data = {
-                        'id': role.id,
-                        'displayName': getattr(role, 'display_name', None),
-                        'description': getattr(role, 'description', None),
-                        'roleTemplateId': getattr(role, 'role_template_id', None)
+                        'id': role.id or '',
+                        'displayName': getattr(role, 'display_name', None) or '',
+                        'description': getattr(role, 'description', None) or '',
+                        'roleTemplateId': getattr(role, 'role_template_id', None) or ''
                     }
                     roles_list.append(role_data)
         return roles_list

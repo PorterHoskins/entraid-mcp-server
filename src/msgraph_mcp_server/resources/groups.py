@@ -27,19 +27,19 @@ async def get_all_groups(graph_client: GraphClient, limit: int = 100) -> List[Di
             response = await client.groups.with_url(response.odata_next_link).get()
             if response and response.value:
                 groups.extend(response.value)
-        # Format output
+        # Format output (convert None to empty string/defaults for MCP compatibility)
         formatted_groups = []
         for group in groups[:limit]:
             group_data = {
-                'id': group.id,
-                'displayName': group.display_name,
-                'mail': group.mail,
-                'mailNickname': group.mail_nickname,
-                'description': group.description,
-                'groupTypes': group.group_types,
-                'securityEnabled': group.security_enabled,
-                'mailEnabled': group.mail_enabled,
-                'createdDateTime': group.created_date_time.isoformat() if group.created_date_time else None
+                'id': group.id or '',
+                'displayName': group.display_name or '',
+                'mail': group.mail or '',
+                'mailNickname': group.mail_nickname or '',
+                'description': group.description or '',
+                'groupTypes': group.group_types or [],
+                'securityEnabled': group.security_enabled if group.security_enabled is not None else False,
+                'mailEnabled': group.mail_enabled if group.mail_enabled is not None else False,
+                'createdDateTime': group.created_date_time.isoformat() if group.created_date_time else ''
             }
             formatted_groups.append(group_data)
         return formatted_groups
@@ -55,16 +55,16 @@ async def get_group_by_id(graph_client: GraphClient, group_id: str) -> Optional[
         
         if group:
             group_data = {
-                'id': group.id,
-                'displayName': group.display_name,
-                'mail': group.mail,
-                'mailNickname': group.mail_nickname,
-                'description': group.description,
-                'groupTypes': group.group_types,
-                'securityEnabled': group.security_enabled,
-                'mailEnabled': group.mail_enabled,
-                'visibility': group.visibility,
-                'createdDateTime': group.created_date_time.isoformat() if group.created_date_time else None
+                'id': group.id or '',
+                'displayName': group.display_name or '',
+                'mail': group.mail or '',
+                'mailNickname': group.mail_nickname or '',
+                'description': group.description or '',
+                'groupTypes': group.group_types or [],
+                'securityEnabled': group.security_enabled if group.security_enabled is not None else False,
+                'mailEnabled': group.mail_enabled if group.mail_enabled is not None else False,
+                'visibility': group.visibility or '',
+                'createdDateTime': group.created_date_time.isoformat() if group.created_date_time else ''
             }
             return group_data
         return None
@@ -93,15 +93,15 @@ async def search_groups_by_name(graph_client: GraphClient, name: str, limit: int
         formatted_groups = []
         for group in groups[:limit]:
             group_data = {
-                'id': group.id,
-                'displayName': group.display_name,
-                'mail': group.mail,
-                'mailNickname': group.mail_nickname,
-                'description': group.description,
-                'groupTypes': group.group_types,
-                'securityEnabled': group.security_enabled,
-                'mailEnabled': group.mail_enabled,
-                'createdDateTime': group.created_date_time.isoformat() if group.created_date_time else None
+                'id': group.id or '',
+                'displayName': group.display_name or '',
+                'mail': group.mail or '',
+                'mailNickname': group.mail_nickname or '',
+                'description': group.description or '',
+                'groupTypes': group.group_types or [],
+                'securityEnabled': group.security_enabled if group.security_enabled is not None else False,
+                'mailEnabled': group.mail_enabled if group.mail_enabled is not None else False,
+                'createdDateTime': group.created_date_time.isoformat() if group.created_date_time else ''
             }
             formatted_groups.append(group_data)
         return formatted_groups
@@ -125,17 +125,17 @@ async def get_group_members(graph_client: GraphClient, group_id: str, limit: int
         formatted_members = []
         for member in members[:limit]:
             member_data = {
-                'id': getattr(member, 'id', None),
-                'displayName': getattr(member, 'display_name', None),
-                'mail': getattr(member, 'mail', None),
-                'userPrincipalName': getattr(member, 'user_principal_name', None),
-                'givenName': getattr(member, 'given_name', None),
-                'surname': getattr(member, 'surname', None),
-                'jobTitle': getattr(member, 'job_title', None),
-                'officeLocation': getattr(member, 'office_location', None),
-                'businessPhones': getattr(member, 'business_phones', None),
-                'mobilePhone': getattr(member, 'mobile_phone', None),
-                'type': getattr(member, 'odata_type', None)
+                'id': getattr(member, 'id', None) or '',
+                'displayName': getattr(member, 'display_name', None) or '',
+                'mail': getattr(member, 'mail', None) or '',
+                'userPrincipalName': getattr(member, 'user_principal_name', None) or '',
+                'givenName': getattr(member, 'given_name', None) or '',
+                'surname': getattr(member, 'surname', None) or '',
+                'jobTitle': getattr(member, 'job_title', None) or '',
+                'officeLocation': getattr(member, 'office_location', None) or '',
+                'businessPhones': getattr(member, 'business_phones', None) or [],
+                'mobilePhone': getattr(member, 'mobile_phone', None) or '',
+                'type': getattr(member, 'odata_type', None) or ''
             }
             formatted_members.append(member_data)
         return formatted_members
@@ -174,16 +174,16 @@ async def create_group(graph_client: GraphClient, group_data: Dict[str, Any]) ->
                 # Return the existing group
                 existing_group = response.value[0]
                 return {
-                    'id': existing_group.id,
-                    'displayName': existing_group.display_name,
-                    'mail': existing_group.mail,
-                    'mailNickname': existing_group.mail_nickname,
-                    'description': existing_group.description,
-                    'groupTypes': existing_group.group_types,
-                    'securityEnabled': existing_group.security_enabled,
-                    'mailEnabled': existing_group.mail_enabled,
-                    'visibility': existing_group.visibility,
-                    'createdDateTime': existing_group.created_date_time.isoformat() if existing_group.created_date_time else None,
+                    'id': existing_group.id or '',
+                    'displayName': existing_group.display_name or '',
+                    'mail': existing_group.mail or '',
+                    'mailNickname': existing_group.mail_nickname or '',
+                    'description': existing_group.description or '',
+                    'groupTypes': existing_group.group_types or [],
+                    'securityEnabled': existing_group.security_enabled if existing_group.security_enabled is not None else False,
+                    'mailEnabled': existing_group.mail_enabled if existing_group.mail_enabled is not None else False,
+                    'visibility': existing_group.visibility or '',
+                    'createdDateTime': existing_group.created_date_time.isoformat() if existing_group.created_date_time else '',
                     'status': 'already_exists'
                 }
         
@@ -257,22 +257,22 @@ async def create_group(graph_client: GraphClient, group_data: Dict[str, Any]) ->
         # Return the created group
         if new_group:
             created_group = {
-                'id': new_group.id,
-                'displayName': new_group.display_name,
-                'mail': new_group.mail,
-                'mailNickname': new_group.mail_nickname,
-                'description': new_group.description,
-                'groupTypes': new_group.group_types,
-                'securityEnabled': new_group.security_enabled,
-                'mailEnabled': new_group.mail_enabled,
-                'visibility': new_group.visibility,
-                'createdDateTime': new_group.created_date_time.isoformat() if new_group.created_date_time else None
+                'id': new_group.id or '',
+                'displayName': new_group.display_name or '',
+                'mail': new_group.mail or '',
+                'mailNickname': new_group.mail_nickname or '',
+                'description': new_group.description or '',
+                'groupTypes': new_group.group_types or [],
+                'securityEnabled': new_group.security_enabled if new_group.security_enabled is not None else False,
+                'mailEnabled': new_group.mail_enabled if new_group.mail_enabled is not None else False,
+                'visibility': new_group.visibility or '',
+                'createdDateTime': new_group.created_date_time.isoformat() if new_group.created_date_time else ''
             }
             
             # Add dynamic membership properties if applicable
             if is_dynamic:
-                created_group['membershipRule'] = new_group.membership_rule
-                created_group['membershipRuleProcessingState'] = new_group.membership_rule_processing_state
+                created_group['membershipRule'] = new_group.membership_rule or ''
+                created_group['membershipRuleProcessingState'] = new_group.membership_rule_processing_state or ''
                 
             return created_group
         
