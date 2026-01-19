@@ -383,8 +383,15 @@ async def add_group_member(graph_client: GraphClient, group_id: str, member_id: 
         reference.odata_id = f"https://graph.microsoft.com/v1.0/directoryObjects/{member_id}"
 
         # Add the member to the group
-        await client.groups.by_group_id(group_id).members.ref.post(reference)
-        
+        try:
+            await client.groups.by_group_id(group_id).members.ref.post(reference)
+        except Exception as post_error:
+            # Check if the error is because member already exists
+            if "already exist" in str(post_error).lower():
+                logger.info(f"Member {member_id} is already in group {group_id}")
+                return True
+            raise
+
         return True
     except Exception as e:
         logger.error(f"Error adding member {member_id} to group {group_id}: {str(e)}")
