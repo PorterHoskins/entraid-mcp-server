@@ -377,11 +377,13 @@ async def add_group_member(graph_client: GraphClient, group_id: str, member_id: 
             pass
         
         # Create a reference to the directory object (member)
-        directory_object = DirectoryObject()
-        directory_object.id = member_id
-        
+        # The Graph API expects @odata.id in the format: https://graph.microsoft.com/v1.0/directoryObjects/{id}
+        from msgraph.generated.models.reference_create import ReferenceCreate
+        reference = ReferenceCreate()
+        reference.odata_id = f"https://graph.microsoft.com/v1.0/directoryObjects/{member_id}"
+
         # Add the member to the group
-        await client.groups.by_group_id(group_id).members.ref.post(directory_object)
+        await client.groups.by_group_id(group_id).members.ref.post(reference)
         
         return True
     except Exception as e:
@@ -439,11 +441,13 @@ async def add_group_owner(graph_client: GraphClient, group_id: str, owner_id: st
         client = graph_client.get_client()
         
         # Create a reference to the directory object (owner)
-        directory_object = DirectoryObject()
-        directory_object.id = owner_id
-        
+        # The Graph API expects @odata.id in the format: https://graph.microsoft.com/v1.0/directoryObjects/{id}
+        from msgraph.generated.models.reference_create import ReferenceCreate
+        reference = ReferenceCreate()
+        reference.odata_id = f"https://graph.microsoft.com/v1.0/directoryObjects/{owner_id}"
+
         # Add the owner to the group
-        await client.groups.by_group_id(group_id).owners.ref.post(directory_object)
+        await client.groups.by_group_id(group_id).owners.ref.post(reference)
         
         return True
     except Exception as e:
