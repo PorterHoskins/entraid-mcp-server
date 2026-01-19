@@ -30,7 +30,7 @@ except AuthenticationError as e:
     raise
 
 @mcp.tool()
-async def search_users(query: str, ctx: Context, limit: int = 10) -> List[Dict[str, str]]:
+async def search_users(query: str, ctx: Context, limit: int = 10) -> List[Dict[str, Any]]:
     """Search for users by name or email.
     
     Args:

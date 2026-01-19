@@ -16,7 +16,7 @@ from utils.graph_client import GraphClient
 
 logger = logging.getLogger(__name__)
 
-async def search_users(graph_client: GraphClient, query: str, limit: int = 10) -> List[Dict[str, str]]:
+async def search_users(graph_client: GraphClient, query: str, limit: int = 10) -> List[Dict[str, Any]]:
     """Search for users by name or email, with paging support."""
     try:
         client = graph_client.get_client()
