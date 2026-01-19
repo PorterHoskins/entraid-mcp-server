@@ -5,7 +5,7 @@ interacting with Microsoft Graph services.
 """
 
 import logging
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Any
 from fastmcp import FastMCP, Context
 
 from auth.graph_auth import GraphAuthManager, AuthenticationError
@@ -56,23 +56,24 @@ async def search_users(query: str, ctx: Context, limit: int = 10) -> List[Dict[s
         raise
 
 @mcp.tool()
-async def get_user_by_id(user_id: str, ctx: Context) -> Optional[Dict[str, Any]]:
+async def get_user_by_id(user_id: str, ctx: Context) -> Dict[str, Any]:
     """Get a specific user by their ID.
-    
+
     Args:
         user_id: The unique identifier (ID) of the user.
         ctx: Context object
-        
+
     Returns:
-        A dictionary containing the user's details if found, otherwise None.
+        A dictionary containing the user's details if found, otherwise an error response.
     """
     await ctx.info(f"Fetching user with ID: {user_id}...")
-    
+
     try:
         result = await users.get_user_by_id(graph_client, user_id)
         await ctx.report_progress(progress=100, total=100)
         if not result:
             await ctx.warning(f"User with ID {user_id} not found.")
+            return {"error": "not_found", "message": f"User with ID {user_id} not found."}
         return result
     except AuthenticationError as e:
         error_msg = f"Authentication error: {str(e)}"
@@ -124,23 +125,24 @@ async def get_user_sign_ins(user_id: str, ctx: Context, days: int = 7) -> List[D
         raise
 
 @mcp.tool()
-async def get_user_mfa_status(user_id: str, ctx: Context) -> Optional[Dict[str, Any]]:
+async def get_user_mfa_status(user_id: str, ctx: Context) -> Dict[str, Any]:
     """Get MFA status and methods for a specific user.
-    
+
     Args:
         user_id: The unique identifier of the user.
         ctx: Context object
-        
+
     Returns:
         A dictionary containing MFA status and methods information.
     """
     await ctx.info(f"Fetching MFA status for user {user_id}...")
-    
+
     try:
         result = await mfa.get_mfa_status(graph_client, user_id)
         await ctx.report_progress(progress=100, total=100)
         if not result:
             await ctx.warning(f"No MFA data found for user {user_id}")
+            return {"error": "not_found", "message": f"No MFA data found for user {user_id}"}
         return result
     except AuthenticationError as e:
         error_msg = f"Authentication error: {str(e)}"
@@ -255,7 +257,7 @@ async def get_all_groups(ctx: Context, limit: int = 100) -> List[Dict[str, Any]]
         raise
 
 @mcp.tool()
-async def get_group_by_id(group_id: str, ctx: Context) -> Optional[Dict[str, Any]]:
+async def get_group_by_id(group_id: str, ctx: Context) -> Dict[str, Any]:
     """Get a specific group by its ID."""
     await ctx.info(f"Fetching group with ID: {group_id}...")
     try:
@@ -263,6 +265,7 @@ async def get_group_by_id(group_id: str, ctx: Context) -> Optional[Dict[str, Any
         await ctx.report_progress(progress=100, total=100)
         if not result:
             await ctx.warning(f"Group with ID {group_id} not found.")
+            return {"error": "not_found", "message": f"Group with ID {group_id} not found."}
         return result
     except Exception as e:
         error_msg = f"Error fetching group {group_id}: {str(e)}"
@@ -383,7 +386,7 @@ async def list_user_password_methods(user_id: str, ctx: Context) -> List[Dict[st
         raise
 
 @mcp.tool()
-async def get_user_password_method(user_id: str, method_id: str, ctx: Context) -> Optional[Dict[str, Any]]:
+async def get_user_password_method(user_id: str, method_id: str, ctx: Context) -> Dict[str, Any]:
     """Get a specific password authentication method for a user."""
     await ctx.info(f"Fetching password method {method_id} for user {user_id}...")
     try:
@@ -391,6 +394,7 @@ async def get_user_password_method(user_id: str, method_id: str, ctx: Context) -
         await ctx.report_progress(progress=100, total=100)
         if not result:
             await ctx.warning(f"Password method {method_id} not found for user {user_id}")
+            return {"error": "not_found", "message": f"Password method {method_id} not found for user {user_id}"}
         return result
     except Exception as e:
         error_msg = f"Error getting password method {method_id} for user {user_id}: {str(e)}"
@@ -787,7 +791,7 @@ async def list_applications(ctx: Context, limit: int = 100) -> List[Dict[str, An
         raise
 
 @mcp.tool()
-async def get_application_by_id(app_id: str, ctx: Context) -> Optional[Dict[str, Any]]:
+async def get_application_by_id(app_id: str, ctx: Context) -> Dict[str, Any]:
     """Get a specific application by its object ID."""
     await ctx.info(f"Fetching application with ID: {app_id}...")
     try:
@@ -795,6 +799,7 @@ async def get_application_by_id(app_id: str, ctx: Context) -> Optional[Dict[str,
         await ctx.report_progress(progress=100, total=100)
         if not result:
             await ctx.warning(f"Application with ID {app_id} not found.")
+            return {"error": "not_found", "message": f"Application with ID {app_id} not found."}
         return result
     except Exception as e:
         error_msg = f"Error fetching application {app_id}: {str(e)}"
@@ -862,7 +867,7 @@ async def list_service_principals(ctx: Context, limit: int = 100) -> List[Dict[s
         raise
 
 @mcp.tool()
-async def get_service_principal_by_id(sp_id: str, ctx: Context) -> Optional[Dict[str, Any]]:
+async def get_service_principal_by_id(sp_id: str, ctx: Context) -> Dict[str, Any]:
     """Get a specific service principal by its object ID."""
     await ctx.info(f"Fetching service principal with ID: {sp_id}...")
     try:
@@ -870,6 +875,7 @@ async def get_service_principal_by_id(sp_id: str, ctx: Context) -> Optional[Dict
         await ctx.report_progress(progress=100, total=100)
         if not result:
             await ctx.warning(f"Service principal with ID {sp_id} not found.")
+            return {"error": "not_found", "message": f"Service principal with ID {sp_id} not found."}
         return result
     except Exception as e:
         error_msg = f"Error fetching service principal {sp_id}: {str(e)}"
