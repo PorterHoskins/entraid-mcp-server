@@ -228,14 +228,14 @@ async def get_all_graph_permissions(graph_client: GraphClient) -> Dict[str, Any]
         if hasattr(ms_graph_sp, "oauth2_permission_scopes") and ms_graph_sp.oauth2_permission_scopes:
             for permission in ms_graph_sp.oauth2_permission_scopes:
                 delegated_permissions.append({
-                    "id": getattr(permission, "id", None),
-                    "value": getattr(permission, "value", None),
+                    "id": str(getattr(permission, "id", '')) if getattr(permission, "id", None) else '',
+                    "value": getattr(permission, "value", '') or '',
                     "type": "delegated",
-                    "adminConsentDisplayName": getattr(permission, "admin_consent_display_name", None),
-                    "adminConsentDescription": getattr(permission, "admin_consent_description", None),
-                    "userConsentDisplayName": getattr(permission, "user_consent_display_name", None),
-                    "userConsentDescription": getattr(permission, "user_consent_description", None),
-                    "isEnabled": getattr(permission, "is_enabled", None)
+                    "adminConsentDisplayName": getattr(permission, "admin_consent_display_name", '') or '',
+                    "adminConsentDescription": getattr(permission, "admin_consent_description", '') or '',
+                    "userConsentDisplayName": getattr(permission, "user_consent_display_name", '') or '',
+                    "userConsentDescription": getattr(permission, "user_consent_description", '') or '',
+                    "isEnabled": getattr(permission, "is_enabled", None) if getattr(permission, "is_enabled", None) is not None else False
                 })
         
         # Extract application permissions (appRoles)
@@ -243,12 +243,12 @@ async def get_all_graph_permissions(graph_client: GraphClient) -> Dict[str, Any]
         if hasattr(ms_graph_sp, "app_roles") and ms_graph_sp.app_roles:
             for permission in ms_graph_sp.app_roles:
                 application_permissions.append({
-                    "id": getattr(permission, "id", None),
-                    "value": getattr(permission, "value", None),
+                    "id": str(getattr(permission, "id", '')) if getattr(permission, "id", None) else '',
+                    "value": getattr(permission, "value", '') or '',
                     "type": "application",
-                    "displayName": getattr(permission, "display_name", None),
-                    "description": getattr(permission, "description", None),
-                    "isEnabled": getattr(permission, "is_enabled", None)
+                    "displayName": getattr(permission, "display_name", '') or '',
+                    "description": getattr(permission, "description", '') or '',
+                    "isEnabled": getattr(permission, "is_enabled", None) if getattr(permission, "is_enabled", None) is not None else False
                 })
         
         return {

@@ -38,19 +38,19 @@ async def get_user_audit_logs(graph_client: GraphClient, user_id: str, days: int
         formatted_logs = []
         for log in logs:
             log_data = {
-                "id": getattr(log, "id", None),
-                "activityDateTime": log.activity_date_time.isoformat() if getattr(log, "activity_date_time", None) else None,
-                "activityDisplayName": getattr(log, "activity_display_name", None),
-                "category": getattr(log, "category", None),
-                "operationType": getattr(log, "operation_type", None),
-                "result": getattr(log, "result", None),
-                "resultReason": getattr(log, "result_reason", None),
-                "initiatedBy": None,
-                "targetResources": None,
-                "loggedByService": getattr(log, "logged_by_service", None),
-                "correlationId": getattr(log, "correlation_id", None),
+                "id": getattr(log, "id", '') or '',
+                "activityDateTime": log.activity_date_time.isoformat() if getattr(log, "activity_date_time", None) else '',
+                "activityDisplayName": getattr(log, "activity_display_name", '') or '',
+                "category": getattr(log, "category", '') or '',
+                "operationType": getattr(log, "operation_type", '') or '',
+                "result": str(getattr(log, "result", '')) if getattr(log, "result", None) else '',
+                "resultReason": getattr(log, "result_reason", '') or '',
+                "initiatedBy": {},
+                "targetResources": [],
+                "loggedByService": getattr(log, "logged_by_service", '') or '',
+                "correlationId": getattr(log, "correlation_id", '') or '',
                 "additionalDetails": [
-                    {"key": getattr(kv, 'key', None), "value": getattr(kv, 'value', None)} for kv in getattr(log, 'additional_details', [])
+                    {"key": getattr(kv, 'key', '') or '', "value": getattr(kv, 'value', '') or ''} for kv in getattr(log, 'additional_details', [])
                 ] if hasattr(log, 'additional_details') and log.additional_details else [],
             }
             # initiatedBy
@@ -58,28 +58,28 @@ async def get_user_audit_logs(graph_client: GraphClient, user_id: str, days: int
                 ib = log.initiated_by
                 log_data["initiatedBy"] = {
                     "user": {
-                        "id": getattr(ib.user, 'id', None) if hasattr(ib, 'user') and ib.user else None,
-                        "displayName": getattr(ib.user, 'display_name', None) if hasattr(ib, 'user') and ib.user else None,
-                        "userPrincipalName": getattr(ib.user, 'user_principal_name', None) if hasattr(ib, 'user') and ib.user else None
-                    } if hasattr(ib, 'user') and ib.user else None,
+                        "id": (getattr(ib.user, 'id', '') or '') if hasattr(ib, 'user') and ib.user else '',
+                        "displayName": (getattr(ib.user, 'display_name', '') or '') if hasattr(ib, 'user') and ib.user else '',
+                        "userPrincipalName": (getattr(ib.user, 'user_principal_name', '') or '') if hasattr(ib, 'user') and ib.user else ''
+                    } if hasattr(ib, 'user') and ib.user else {},
                     "app": {
-                        "appId": getattr(ib.app, 'app_id', None) if hasattr(ib, 'app') and ib.app else None,
-                        "displayName": getattr(ib.app, 'display_name', None) if hasattr(ib, 'app') and ib.app else None
-                    } if hasattr(ib, 'app') and ib.app else None
+                        "appId": (getattr(ib.app, 'app_id', '') or '') if hasattr(ib, 'app') and ib.app else '',
+                        "displayName": (getattr(ib.app, 'display_name', '') or '') if hasattr(ib, 'app') and ib.app else ''
+                    } if hasattr(ib, 'app') and ib.app else {}
                 }
             # targetResources
             if hasattr(log, 'target_resources') and log.target_resources:
                 log_data["targetResources"] = [
                     {
-                        "id": getattr(tr, 'id', None),
-                        "displayName": getattr(tr, 'display_name', None),
-                        "type": getattr(tr, 'type', None),
-                        "userPrincipalName": getattr(tr, 'user_principal_name', None),
+                        "id": getattr(tr, 'id', '') or '',
+                        "displayName": getattr(tr, 'display_name', '') or '',
+                        "type": getattr(tr, 'type', '') or '',
+                        "userPrincipalName": getattr(tr, 'user_principal_name', '') or '',
                         "modifiedProperties": [
                             {
-                                "displayName": getattr(mp, 'display_name', None),
-                                "oldValue": getattr(mp, 'old_value', None),
-                                "newValue": getattr(mp, 'new_value', None)
+                                "displayName": getattr(mp, 'display_name', '') or '',
+                                "oldValue": getattr(mp, 'old_value', '') or '',
+                                "newValue": getattr(mp, 'new_value', '') or ''
                             } for mp in getattr(tr, 'modified_properties', [])
                         ] if hasattr(tr, 'modified_properties') and tr.modified_properties else []
                     }

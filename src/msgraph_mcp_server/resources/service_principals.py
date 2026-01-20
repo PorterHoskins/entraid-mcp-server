@@ -26,13 +26,13 @@ async def list_service_principals(graph_client: GraphClient, limit: int = 100) -
         formatted_sps = []
         for sp in service_principals[:limit]:
             sp_data = {
-                'id': getattr(sp, 'id', None),
-                'appId': getattr(sp, 'app_id', None),
-                'displayName': getattr(sp, 'display_name', None),
-                'createdDateTime': sp.created_date_time.isoformat() if getattr(sp, 'created_date_time', None) else None,
-                'accountEnabled': getattr(sp, 'account_enabled', None),
-                'appOwnerOrganizationId': getattr(sp, 'app_owner_organization_id', None),
-                'tags': getattr(sp, 'tags', None),
+                'id': getattr(sp, 'id', '') or '',
+                'appId': getattr(sp, 'app_id', '') or '',
+                'displayName': getattr(sp, 'display_name', '') or '',
+                'createdDateTime': sp.created_date_time.isoformat() if getattr(sp, 'created_date_time', None) else '',
+                'accountEnabled': getattr(sp, 'account_enabled', None) if getattr(sp, 'account_enabled', None) is not None else False,
+                'appOwnerOrganizationId': str(getattr(sp, 'app_owner_organization_id', '')) if getattr(sp, 'app_owner_organization_id', None) else '',
+                'tags': getattr(sp, 'tags', []) or [],
             }
             formatted_sps.append(sp_data)
         return formatted_sps
@@ -61,13 +61,13 @@ async def get_service_principal_by_id(graph_client: GraphClient, sp_id: str) -> 
         sp = await client.service_principals.by_service_principal_id(sp_id).get()
         if sp:
             sp_data = {
-                'id': getattr(sp, 'id', None),
-                'appId': getattr(sp, 'app_id', None),
-                'displayName': getattr(sp, 'display_name', None),
-                'createdDateTime': sp.created_date_time.isoformat() if getattr(sp, 'created_date_time', None) else None,
-                'accountEnabled': getattr(sp, 'account_enabled', None),
-                'appOwnerOrganizationId': getattr(sp, 'app_owner_organization_id', None),
-                'tags': getattr(sp, 'tags', None),
+                'id': getattr(sp, 'id', '') or '',
+                'appId': getattr(sp, 'app_id', '') or '',
+                'displayName': getattr(sp, 'display_name', '') or '',
+                'createdDateTime': sp.created_date_time.isoformat() if getattr(sp, 'created_date_time', None) else '',
+                'accountEnabled': getattr(sp, 'account_enabled', None) if getattr(sp, 'account_enabled', None) is not None else False,
+                'appOwnerOrganizationId': str(getattr(sp, 'app_owner_organization_id', '')) if getattr(sp, 'app_owner_organization_id', None) else '',
+                'tags': getattr(sp, 'tags', []) or [],
             }
             # Fetch appRoleAssignments (application permissions)
             app_role_assignments = []
@@ -76,15 +76,16 @@ async def get_service_principal_by_id(graph_client: GraphClient, sp_id: str) -> 
                 while response:
                     if response.value:
                         for assignment in response.value:
+                            created_dt = getattr(assignment, 'created_date_time', None)
                             app_role_assignments.append({
-                                'id': getattr(assignment, 'id', None),
-                                'createdDateTime': getattr(assignment, 'created_date_time', None),
-                                'appRoleId': getattr(assignment, 'app_role_id', None),
-                                'principalDisplayName': getattr(assignment, 'principal_display_name', None),
-                                'principalId': getattr(assignment, 'principal_id', None),
-                                'principalType': getattr(assignment, 'principal_type', None),
-                                'resourceDisplayName': getattr(assignment, 'resource_display_name', None),
-                                'resourceId': getattr(assignment, 'resource_id', None),
+                                'id': getattr(assignment, 'id', '') or '',
+                                'createdDateTime': created_dt.isoformat() if created_dt else '',
+                                'appRoleId': str(getattr(assignment, 'app_role_id', '')) if getattr(assignment, 'app_role_id', None) else '',
+                                'principalDisplayName': getattr(assignment, 'principal_display_name', '') or '',
+                                'principalId': str(getattr(assignment, 'principal_id', '')) if getattr(assignment, 'principal_id', None) else '',
+                                'principalType': getattr(assignment, 'principal_type', '') or '',
+                                'resourceDisplayName': getattr(assignment, 'resource_display_name', '') or '',
+                                'resourceId': str(getattr(assignment, 'resource_id', '')) if getattr(assignment, 'resource_id', None) else '',
                             })
                     if getattr(response, 'odata_next_link', None):
                         response = await client.service_principals.by_service_principal_id(sp_id).app_role_assignments.with_url(response.odata_next_link).get()
@@ -102,12 +103,12 @@ async def get_service_principal_by_id(graph_client: GraphClient, sp_id: str) -> 
                     if response.value:
                         for grant in response.value:
                             oauth2_permission_grants.append({
-                                'id': getattr(grant, 'id', None),
-                                'clientId': getattr(grant, 'client_id', None),
-                                'consentType': getattr(grant, 'consent_type', None),
-                                'principalId': getattr(grant, 'principal_id', None),
-                                'resourceId': getattr(grant, 'resource_id', None),
-                                'scope': getattr(grant, 'scope', None),
+                                'id': getattr(grant, 'id', '') or '',
+                                'clientId': getattr(grant, 'client_id', '') or '',
+                                'consentType': getattr(grant, 'consent_type', '') or '',
+                                'principalId': getattr(grant, 'principal_id', '') or '',
+                                'resourceId': getattr(grant, 'resource_id', '') or '',
+                                'scope': getattr(grant, 'scope', '') or '',
                             })
                     if getattr(response, 'odata_next_link', None):
                         response = await client.service_principals.by_service_principal_id(sp_id).oauth2_permission_grants.with_url(response.odata_next_link).get()
@@ -142,13 +143,13 @@ async def create_service_principal(graph_client: GraphClient, sp_data: Dict[str,
         new_sp = await client.service_principals.post(sp)
         if new_sp:
             return {
-                'id': getattr(new_sp, 'id', None),
-                'appId': getattr(new_sp, 'app_id', None),
-                'displayName': getattr(new_sp, 'display_name', None),
-                'createdDateTime': new_sp.created_date_time.isoformat() if getattr(new_sp, 'created_date_time', None) else None,
-                'accountEnabled': getattr(new_sp, 'account_enabled', None),
-                'appOwnerOrganizationId': getattr(new_sp, 'app_owner_organization_id', None),
-                'tags': getattr(new_sp, 'tags', None),
+                'id': getattr(new_sp, 'id', '') or '',
+                'appId': getattr(new_sp, 'app_id', '') or '',
+                'displayName': getattr(new_sp, 'display_name', '') or '',
+                'createdDateTime': new_sp.created_date_time.isoformat() if getattr(new_sp, 'created_date_time', None) else '',
+                'accountEnabled': getattr(new_sp, 'account_enabled', None) if getattr(new_sp, 'account_enabled', None) is not None else False,
+                'appOwnerOrganizationId': str(getattr(new_sp, 'app_owner_organization_id', '')) if getattr(new_sp, 'app_owner_organization_id', None) else '',
+                'tags': getattr(new_sp, 'tags', []) or [],
             }
         raise Exception("Failed to create service principal")
     except Exception as e:

@@ -66,29 +66,29 @@ async def get_user_sign_in_logs(graph_client: GraphClient, user_id: str, days: i
             for log in sign_ins.value:
                 # Format each log entry with comprehensive fields
                 log_data = {
-                    "id": log.id,
-                    "createdDateTime": log.created_date_time.isoformat() if log.created_date_time else None,
-                    "userId": log.user_id,
-                    "userDisplayName": log.user_display_name,
-                    "userPrincipalName": log.user_principal_name,
-                    "appDisplayName": log.app_display_name,
-                    "appId": log.app_id,
-                    "ipAddress": log.ip_address,
-                    "clientAppUsed": log.client_app_used,
-                    "correlationId": log.correlation_id,
-                    "isInteractive": log.is_interactive,
-                    "resourceDisplayName": log.resource_display_name,
+                    "id": log.id or '',
+                    "createdDateTime": log.created_date_time.isoformat() if log.created_date_time else '',
+                    "userId": log.user_id or '',
+                    "userDisplayName": log.user_display_name or '',
+                    "userPrincipalName": log.user_principal_name or '',
+                    "appDisplayName": log.app_display_name or '',
+                    "appId": log.app_id or '',
+                    "ipAddress": log.ip_address or '',
+                    "clientAppUsed": log.client_app_used or '',
+                    "correlationId": log.correlation_id or '',
+                    "isInteractive": log.is_interactive if log.is_interactive is not None else False,
+                    "resourceDisplayName": log.resource_display_name or '',
                     "status": {
-                        "errorCode": log.status.error_code if log.status else None,
-                        "failureReason": log.status.failure_reason if log.status else None,
-                        "additionalDetails": log.status.additional_details if log.status else None
+                        "errorCode": log.status.error_code if log.status and log.status.error_code is not None else 0,
+                        "failureReason": log.status.failure_reason if log.status else '',
+                        "additionalDetails": log.status.additional_details if log.status else ''
                     },
                     "riskInformation": {
-                        "riskDetail": log.risk_detail,
-                        "riskLevelAggregated": log.risk_level_aggregated,
-                        "riskLevelDuringSignIn": log.risk_level_during_sign_in,
-                        "riskState": log.risk_state,
-                        "riskEventTypes": log.risk_event_types_v2 if hasattr(log, 'risk_event_types_v2') else []
+                        "riskDetail": str(log.risk_detail) if log.risk_detail else '',
+                        "riskLevelAggregated": str(log.risk_level_aggregated) if log.risk_level_aggregated else '',
+                        "riskLevelDuringSignIn": str(log.risk_level_during_sign_in) if log.risk_level_during_sign_in else '',
+                        "riskState": str(log.risk_state) if log.risk_state else '',
+                        "riskEventTypes": log.risk_event_types_v2 if hasattr(log, 'risk_event_types_v2') and log.risk_event_types_v2 else []
                     }
                 }
                 
@@ -96,30 +96,30 @@ async def get_user_sign_in_logs(graph_client: GraphClient, user_id: str, days: i
                 if hasattr(log, 'device_detail') and log.device_detail:
                     device = log.device_detail
                     log_data["deviceDetail"] = {
-                        "deviceId": device.device_id,
-                        "displayName": device.display_name,
-                        "operatingSystem": device.operating_system,
-                        "browser": device.browser,
-                        "isCompliant": device.is_compliant,
-                        "isManaged": device.is_managed,
-                        "trustType": device.trust_type
+                        "deviceId": device.device_id or '',
+                        "displayName": device.display_name or '',
+                        "operatingSystem": device.operating_system or '',
+                        "browser": device.browser or '',
+                        "isCompliant": device.is_compliant if device.is_compliant is not None else False,
+                        "isManaged": device.is_managed if device.is_managed is not None else False,
+                        "trustType": device.trust_type or ''
                     }
                 
                 # Add location if available
                 if hasattr(log, 'location') and log.location:
                     location = log.location
                     log_data["location"] = {
-                        "city": location.city,
-                        "state": location.state,
-                        "countryOrRegion": location.country_or_region,
-                        "coordinates": None
+                        "city": location.city or '',
+                        "state": location.state or '',
+                        "countryOrRegion": location.country_or_region or '',
+                        "coordinates": {}
                     }
-                    
+
                     # Add coordinates if available
                     if hasattr(location, 'geo_coordinates') and location.geo_coordinates:
                         log_data["location"]["coordinates"] = {
-                            "latitude": location.geo_coordinates.latitude,
-                            "longitude": location.geo_coordinates.longitude
+                            "latitude": location.geo_coordinates.latitude if location.geo_coordinates.latitude is not None else 0.0,
+                            "longitude": location.geo_coordinates.longitude if location.geo_coordinates.longitude is not None else 0.0
                         }
                 
                 formatted_logs.append(log_data)

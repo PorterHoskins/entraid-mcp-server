@@ -26,8 +26,8 @@ async def list_user_password_methods(graph_client: GraphClient, user_id: str) ->
         if response and response.value:
             for method in response.value:
                 method_data = {
-                    'id': getattr(method, 'id', None),
-                    'createdDateTime': method.created_date_time.isoformat() if getattr(method, 'created_date_time', None) else None
+                    'id': getattr(method, 'id', '') or '',
+                    'createdDateTime': method.created_date_time.isoformat() if getattr(method, 'created_date_time', None) else ''
                 }
                 formatted_methods.append(method_data)
                 
@@ -53,8 +53,8 @@ async def get_user_password_method(graph_client: GraphClient, user_id: str, meth
         
         if method:
             method_data = {
-                'id': getattr(method, 'id', None),
-                'createdDateTime': method.created_date_time.isoformat() if getattr(method, 'created_date_time', None) else None
+                'id': getattr(method, 'id', '') or '',
+                'createdDateTime': method.created_date_time.isoformat() if getattr(method, 'created_date_time', None) else ''
             }
             return method_data
         return None

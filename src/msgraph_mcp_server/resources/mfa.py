@@ -45,8 +45,8 @@ async def get_mfa_status(graph_client: GraphClient, user_id: str) -> Dict[str, A
         # Initialize MFA status object
         mfa_status = {
             'userPrincipalName': user_id,
-            'mail': user.mail if user else None,
-            'companyName': user.company_name if user else None,
+            'mail': (user.mail if user and user.mail else '') or '',
+            'companyName': (user.company_name if user and user.company_name else '') or '',
             'mfaStatus': 'Disabled',
             'methods': {
                 'email': False,

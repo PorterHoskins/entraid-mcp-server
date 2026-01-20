@@ -7,7 +7,6 @@ import logging
 from typing import Dict, List, Any, Optional
 from msgraph.generated.groups.groups_request_builder import GroupsRequestBuilder
 from msgraph.generated.models.group import Group
-from msgraph.generated.models.directory_object import DirectoryObject
 from utils.graph_client import GraphClient
 
 logger = logging.getLogger(__name__)
@@ -435,18 +434,29 @@ async def remove_group_member(graph_client: GraphClient, group_id: str, member_i
 
 async def add_group_owner(graph_client: GraphClient, group_id: str, owner_id: str) -> bool:
     """Add an owner to a group.
-    
+
     Args:
         graph_client: GraphClient instance
         group_id: ID of the group
         owner_id: ID of the user to add as owner
-        
+
     Returns:
         True if successful, raises an exception otherwise
     """
     try:
         client = graph_client.get_client()
-        
+
+        # Check if owner is already in the group
+        try:
+            # This will raise an exception if owner is not found
+            existing_owner = await client.groups.by_group_id(group_id).owners.by_directory_object_id(owner_id).get()
+            if existing_owner:
+                logger.info(f"Owner {owner_id} is already an owner of group {group_id}")
+                return True
+        except Exception:
+            # Owner is not in the group, continue with adding
+            pass
+
         # Create a reference to the directory object (owner)
         # The Graph API expects @odata.id in the format: https://graph.microsoft.com/v1.0/directoryObjects/{id}
         from msgraph.generated.models.reference_create import ReferenceCreate
@@ -454,8 +464,15 @@ async def add_group_owner(graph_client: GraphClient, group_id: str, owner_id: st
         reference.odata_id = f"https://graph.microsoft.com/v1.0/directoryObjects/{owner_id}"
 
         # Add the owner to the group
-        await client.groups.by_group_id(group_id).owners.ref.post(reference)
-        
+        try:
+            await client.groups.by_group_id(group_id).owners.ref.post(reference)
+        except Exception as post_error:
+            # Check if the error is because owner already exists
+            if "already exist" in str(post_error).lower():
+                logger.info(f"Owner {owner_id} is already an owner of group {group_id}")
+                return True
+            raise
+
         return True
     except Exception as e:
         logger.error(f"Error adding owner {owner_id} to group {group_id}: {str(e)}")

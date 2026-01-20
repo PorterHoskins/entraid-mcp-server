@@ -178,11 +178,11 @@ async def get_conditional_access_policies(graph_client: GraphClient) -> List[Dic
                 session_controls = parse_session_controls(getattr(policy, 'session_controls', None))
                 # Compose policy data
                 policy_data = {
-                    'id': getattr(policy, 'id', None),
-                    'displayName': getattr(policy, 'display_name', None),
-                    'state': getattr(policy, 'state', None).value if getattr(policy, 'state', None) else None,
-                    'createdDateTime': policy.created_date_time.isoformat() if getattr(policy, 'created_date_time', None) else None,
-                    'modifiedDateTime': policy.modified_date_time.isoformat() if getattr(policy, 'modified_date_time', None) else None,
+                    'id': getattr(policy, 'id', '') or '',
+                    'displayName': getattr(policy, 'display_name', '') or '',
+                    'state': getattr(policy, 'state', None).value if getattr(policy, 'state', None) else '',
+                    'createdDateTime': policy.created_date_time.isoformat() if getattr(policy, 'created_date_time', None) else '',
+                    'modifiedDateTime': policy.modified_date_time.isoformat() if getattr(policy, 'modified_date_time', None) else '',
                     **conditions,
                     **{f'Grant_{k}': v for k, v in grant_controls.items()},
                     **session_controls
@@ -208,11 +208,11 @@ async def get_conditional_access_policy_by_id(graph_client: GraphClient, policy_
         session_controls = parse_session_controls(getattr(policy, 'session_controls', None))
         # Compose policy data
         policy_data = {
-            'id': getattr(policy, 'id', None),
-            'displayName': getattr(policy, 'display_name', None),
-            'state': getattr(policy, 'state', None).value if getattr(policy, 'state', None) else None,
-            'createdDateTime': policy.created_date_time.isoformat() if getattr(policy, 'created_date_time', None) else None,
-            'modifiedDateTime': policy.modified_date_time.isoformat() if getattr(policy, 'modified_date_time', None) else None,
+            'id': getattr(policy, 'id', '') or '',
+            'displayName': getattr(policy, 'display_name', '') or '',
+            'state': getattr(policy, 'state', None).value if getattr(policy, 'state', None) else '',
+            'createdDateTime': policy.created_date_time.isoformat() if getattr(policy, 'created_date_time', None) else '',
+            'modifiedDateTime': policy.modified_date_time.isoformat() if getattr(policy, 'modified_date_time', None) else '',
             **conditions,
             **{f'Grant_{k}': v for k, v in grant_controls.items()},
             **session_controls

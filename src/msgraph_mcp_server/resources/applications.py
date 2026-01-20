@@ -27,13 +27,13 @@ async def list_applications(graph_client: GraphClient, limit: int = 100) -> List
         formatted_apps = []
         for app in applications[:limit]:
             app_data = {
-                'id': getattr(app, 'id', None),
-                'appId': getattr(app, 'app_id', None),
-                'displayName': getattr(app, 'display_name', None),
-                'createdDateTime': app.created_date_time.isoformat() if getattr(app, 'created_date_time', None) else None,
-                'signInAudience': getattr(app, 'sign_in_audience', None),
-                'publisherDomain': getattr(app, 'publisher_domain', None),
-                'tags': getattr(app, 'tags', None),
+                'id': getattr(app, 'id', '') or '',
+                'appId': getattr(app, 'app_id', '') or '',
+                'displayName': getattr(app, 'display_name', '') or '',
+                'createdDateTime': app.created_date_time.isoformat() if getattr(app, 'created_date_time', None) else '',
+                'signInAudience': getattr(app, 'sign_in_audience', '') or '',
+                'publisherDomain': getattr(app, 'publisher_domain', '') or '',
+                'tags': getattr(app, 'tags', []) or [],
             }
             formatted_apps.append(app_data)
         return formatted_apps
@@ -48,13 +48,13 @@ async def get_application_by_id(graph_client: GraphClient, app_id: str) -> Optio
         app = await client.applications.by_application_id(app_id).get()
         if app:
             app_data = {
-                'id': getattr(app, 'id', None),
-                'appId': getattr(app, 'app_id', None),
-                'displayName': getattr(app, 'display_name', None),
-                'createdDateTime': app.created_date_time.isoformat() if getattr(app, 'created_date_time', None) else None,
-                'signInAudience': getattr(app, 'sign_in_audience', None),
-                'publisherDomain': getattr(app, 'publisher_domain', None),
-                'tags': getattr(app, 'tags', None),
+                'id': getattr(app, 'id', '') or '',
+                'appId': getattr(app, 'app_id', '') or '',
+                'displayName': getattr(app, 'display_name', '') or '',
+                'createdDateTime': app.created_date_time.isoformat() if getattr(app, 'created_date_time', None) else '',
+                'signInAudience': getattr(app, 'sign_in_audience', '') or '',
+                'publisherDomain': getattr(app, 'publisher_domain', '') or '',
+                'tags': getattr(app, 'tags', []) or [],
             }
             # Find the corresponding service principal by appId
             sp = await get_service_principal_by_app_id(graph_client, getattr(app, 'app_id', None))
@@ -68,15 +68,16 @@ async def get_application_by_id(graph_client: GraphClient, app_id: str) -> Optio
                     while response:
                         if response.value:
                             for assignment in response.value:
+                                created_dt = getattr(assignment, 'created_date_time', None)
                                 app_role_assignments.append({
-                                    'id': getattr(assignment, 'id', None),
-                                    'createdDateTime': getattr(assignment, 'created_date_time', None),
-                                    'appRoleId': getattr(assignment, 'app_role_id', None),
-                                    'principalDisplayName': getattr(assignment, 'principal_display_name', None),
-                                    'principalId': getattr(assignment, 'principal_id', None),
-                                    'principalType': getattr(assignment, 'principal_type', None),
-                                    'resourceDisplayName': getattr(assignment, 'resource_display_name', None),
-                                    'resourceId': getattr(assignment, 'resource_id', None),
+                                    'id': getattr(assignment, 'id', '') or '',
+                                    'createdDateTime': created_dt.isoformat() if created_dt else '',
+                                    'appRoleId': str(getattr(assignment, 'app_role_id', '')) if getattr(assignment, 'app_role_id', None) else '',
+                                    'principalDisplayName': getattr(assignment, 'principal_display_name', '') or '',
+                                    'principalId': str(getattr(assignment, 'principal_id', '')) if getattr(assignment, 'principal_id', None) else '',
+                                    'principalType': getattr(assignment, 'principal_type', '') or '',
+                                    'resourceDisplayName': getattr(assignment, 'resource_display_name', '') or '',
+                                    'resourceId': str(getattr(assignment, 'resource_id', '')) if getattr(assignment, 'resource_id', None) else '',
                                 })
                         if getattr(response, 'odata_next_link', None):
                             response = await client.service_principals.by_service_principal_id(sp_id).app_role_assignments.with_url(response.odata_next_link).get()
@@ -94,12 +95,12 @@ async def get_application_by_id(graph_client: GraphClient, app_id: str) -> Optio
                         if response.value:
                             for grant in response.value:
                                 oauth2_permission_grants.append({
-                                    'id': getattr(grant, 'id', None),
-                                    'clientId': getattr(grant, 'client_id', None),
-                                    'consentType': getattr(grant, 'consent_type', None),
-                                    'principalId': getattr(grant, 'principal_id', None),
-                                    'resourceId': getattr(grant, 'resource_id', None),
-                                    'scope': getattr(grant, 'scope', None),
+                                    'id': getattr(grant, 'id', '') or '',
+                                    'clientId': getattr(grant, 'client_id', '') or '',
+                                    'consentType': getattr(grant, 'consent_type', '') or '',
+                                    'principalId': getattr(grant, 'principal_id', '') or '',
+                                    'resourceId': getattr(grant, 'resource_id', '') or '',
+                                    'scope': getattr(grant, 'scope', '') or '',
                                 })
                         if getattr(response, 'odata_next_link', None):
                             response = await client.service_principals.by_service_principal_id(sp_id).oauth2_permission_grants.with_url(response.odata_next_link).get()
@@ -140,13 +141,13 @@ async def create_application(graph_client: GraphClient, app_data: Dict[str, Any]
         new_app = await client.applications.post(app)
         if new_app:
             return {
-                'id': getattr(new_app, 'id', None),
-                'appId': getattr(new_app, 'app_id', None),
-                'displayName': getattr(new_app, 'display_name', None),
-                'createdDateTime': new_app.created_date_time.isoformat() if getattr(new_app, 'created_date_time', None) else None,
-                'signInAudience': getattr(new_app, 'sign_in_audience', None),
-                'publisherDomain': getattr(new_app, 'publisher_domain', None),
-                'tags': getattr(new_app, 'tags', None),
+                'id': getattr(new_app, 'id', '') or '',
+                'appId': getattr(new_app, 'app_id', '') or '',
+                'displayName': getattr(new_app, 'display_name', '') or '',
+                'createdDateTime': new_app.created_date_time.isoformat() if getattr(new_app, 'created_date_time', None) else '',
+                'signInAudience': getattr(new_app, 'sign_in_audience', '') or '',
+                'publisherDomain': getattr(new_app, 'publisher_domain', '') or '',
+                'tags': getattr(new_app, 'tags', []) or [],
             }
         raise Exception("Failed to create application")
     except Exception as e:

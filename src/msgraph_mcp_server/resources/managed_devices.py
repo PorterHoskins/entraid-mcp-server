@@ -26,17 +26,17 @@ async def get_all_managed_devices(graph_client: GraphClient, filter_os: Optional
         formatted_devices = []
         for device in devices:
             device_data = {
-                'id': getattr(device, 'id', None),
-                'deviceName': getattr(device, 'device_name', None),
-                'userId': getattr(device, 'user_id', None),
-                'userPrincipalName': getattr(device, 'user_principal_name', None),
-                'operatingSystem': getattr(device, 'operating_system', None),
-                'osVersion': getattr(device, 'os_version', None),
-                'managementAgent': getattr(device, 'management_agent', None).value if getattr(device, 'management_agent', None) else None,
-                'complianceState': getattr(device, 'compliance_state', None).value if getattr(device, 'compliance_state', None) else None,
-                'jailBroken': getattr(device, 'jail_broken', None),
-                'enrollmentType': getattr(device, 'enrollment_type', None).value if getattr(device, 'enrollment_type', None) else None,
-                'lastSyncDateTime': getattr(device, 'last_sync_date_time', None).isoformat() if getattr(device, 'last_sync_date_time', None) else None
+                'id': getattr(device, 'id', '') or '',
+                'deviceName': getattr(device, 'device_name', '') or '',
+                'userId': getattr(device, 'user_id', '') or '',
+                'userPrincipalName': getattr(device, 'user_principal_name', '') or '',
+                'operatingSystem': getattr(device, 'operating_system', '') or '',
+                'osVersion': getattr(device, 'os_version', '') or '',
+                'managementAgent': getattr(device, 'management_agent', None).value if getattr(device, 'management_agent', None) else '',
+                'complianceState': getattr(device, 'compliance_state', None).value if getattr(device, 'compliance_state', None) else '',
+                'jailBroken': getattr(device, 'jail_broken', '') or '',
+                'enrollmentType': getattr(device, 'enrollment_type', None).value if getattr(device, 'enrollment_type', None) else '',
+                'lastSyncDateTime': getattr(device, 'last_sync_date_time', None).isoformat() if getattr(device, 'last_sync_date_time', None) else ''
             }
             formatted_devices.append(device_data)
         return formatted_devices
@@ -64,17 +64,17 @@ async def get_managed_devices_by_user(graph_client: GraphClient, user_id: str) -
         formatted_devices = []
         for device in devices:
             device_data = {
-                'id': getattr(device, 'id', None),
-                'deviceName': getattr(device, 'device_name', None),
-                'userId': getattr(device, 'user_id', None),
-                'userPrincipalName': getattr(device, 'user_principal_name', None),
-                'operatingSystem': getattr(device, 'operating_system', None),
-                'osVersion': getattr(device, 'os_version', None),
-                'managementAgent': getattr(device, 'management_agent', None).value if getattr(device, 'management_agent', None) else None,
-                'complianceState': getattr(device, 'compliance_state', None).value if getattr(device, 'compliance_state', None) else None,
-                'jailBroken': getattr(device, 'jail_broken', None),
-                'enrollmentType': getattr(device, 'enrollment_type', None).value if getattr(device, 'enrollment_type', None) else None,
-                'lastSyncDateTime': getattr(device, 'last_sync_date_time', None).isoformat() if getattr(device, 'last_sync_date_time', None) else None
+                'id': getattr(device, 'id', '') or '',
+                'deviceName': getattr(device, 'device_name', '') or '',
+                'userId': getattr(device, 'user_id', '') or '',
+                'userPrincipalName': getattr(device, 'user_principal_name', '') or '',
+                'operatingSystem': getattr(device, 'operating_system', '') or '',
+                'osVersion': getattr(device, 'os_version', '') or '',
+                'managementAgent': getattr(device, 'management_agent', None).value if getattr(device, 'management_agent', None) else '',
+                'complianceState': getattr(device, 'compliance_state', None).value if getattr(device, 'compliance_state', None) else '',
+                'jailBroken': getattr(device, 'jail_broken', '') or '',
+                'enrollmentType': getattr(device, 'enrollment_type', None).value if getattr(device, 'enrollment_type', None) else '',
+                'lastSyncDateTime': getattr(device, 'last_sync_date_time', None).isoformat() if getattr(device, 'last_sync_date_time', None) else ''
             }
             formatted_devices.append(device_data)
         return formatted_devices
